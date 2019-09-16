@@ -23,6 +23,7 @@ import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.Struct;
 
+import org.apache.kafka.connect.transforms.util.SimpleConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,17 +39,27 @@ abstract class DeleteIf<R extends ConnectRecord<R>> implements Transformation<R>
     private static final Logger LOGGER = LoggerFactory.getLogger(DeleteIf.class);
 
     interface ConfigName {
-        String SOURCE_FIELDS = "sourceFields";
+        String FIELD = "field";
+        String VALUE = "value";
     }
 
     private static final ConfigDef CONFIG_DEF = new ConfigDef()
-            .define(ConfigName.SOURCE_FIELDS, ConfigDef.Type.LIST, "", ConfigDef.Importance.MEDIUM,
-                    "Source field name. This field will be expanded to json object.");
+            .define(ConfigName.FIELD, ConfigDef.Type.STRING, "", ConfigDef.Importance.MEDIUM,
+                    "Field checked to have given value to apply deleting (setting message value to null).")
+            .define(ConfigName.VALUE, ConfigDef.Type.STRING, "", ConfigDef.Importance.MEDIUM,
+                    "Value of named field to apply deleting (setting message value to null).");
 
     private static final String PURPOSE = "json field expansion";
 
+    private String field;
+    private String value;
+
     @Override
-    public void configure(Map<String, ?> configs) {}
+    public void configure(Map<String, ?> configs) {
+        final SimpleConfig config = new SimpleConfig(CONFIG_DEF, configs);
+        field = config.getString(ConfigName.FIELD);
+        value = config.getString(ConfigName.VALUE);
+    }
 
     @Override
     public R apply(R record) {
@@ -63,7 +74,7 @@ abstract class DeleteIf<R extends ConnectRecord<R>> implements Transformation<R>
     private R applyWithSchema(R record) {
         final Struct value = requireStruct(operatingValue(record), PURPOSE);
         for (Field field : value.schema().fields()) {
-            if (field.name().equals("__deleted") && value.getString("__deleted").equals("true")) {
+            if (field.name().equals(this.field) && value.getString(this.field).equals(this.value)) {
                 return newRecord(record, value.schema(), null);
             }
         }

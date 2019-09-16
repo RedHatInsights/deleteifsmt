@@ -52,6 +52,8 @@ public class DeleteIfTest {
     @Test
     public void doNotDelete() {
         final Map<String, String> props = new HashMap<>();
+        props.put("field", "__deleted");
+        props.put("value", "true");
         xform.configure(props);
 
         final Schema schema = SchemaBuilder.struct()
@@ -75,6 +77,8 @@ public class DeleteIfTest {
     @Test
     public void doDelete() {
         final Map<String, String> props = new HashMap<>();
+        props.put("field", "__deleted");
+        props.put("value", "true");
         xform.configure(props);
 
         final Schema schema = SchemaBuilder.struct()
