@@ -7,9 +7,9 @@ Use it in connector config file like this:
 ~~~json
 ...
 "transforms": "deleteIf",
-"transforms.deleteif.type": "com.redhat.insights.deleteifsmt.DeleteIf$Value",
-"transforms.deleteif.field": "__deleted",
-"transforms.deleteif.value": "true",
+"transforms.deleteIf.type": "com.redhat.insights.deleteifsmt.DeleteIf$Value",
+"transforms.deleteIf.field": "__deleted",
+"transforms.deleteIf.value": "true",
 ...
 ~~~
 
